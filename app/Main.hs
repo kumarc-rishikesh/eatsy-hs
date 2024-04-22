@@ -9,6 +9,7 @@ import Data.Text (Text)
 import Data.Aeson 
 import Network.HTTP.Simple as NS
 import System.Environment
+import qualified Data.ByteString.Char8 as B
 -- import qualified Data.Text.IO as T
 -- import Control.Lens
 -- import Control.Monad (forM)
@@ -42,9 +43,9 @@ main = do
 
 createUser :: User -> IO String 
 createUser usr = do
+    neureloKey <- getEnv "NEURELO_KEY"
     let 
-        neureloKey = [getEnv "NEURELO_KEY"] 
         method = "POST https://us-east-2.aws.neurelo.com/rest/APPUSER/__one?"        
-        request = setRequestBodyJSON usr $ setRequestHeader "X-API-KEY" neureloKey $ method
+        request = setRequestBodyJSON usr $ setRequestHeader "X-API-KEY" [B.pack neureloKey] $ method
     resp <- httpLBS request 
     pure $ show $ getResponseStatus resp
