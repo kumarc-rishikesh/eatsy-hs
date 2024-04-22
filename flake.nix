@@ -6,7 +6,7 @@
   description = "My haskell application";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -20,7 +20,7 @@
         jailbreakUnbreak = pkg:
           pkgs.haskell.lib.doJailbreak (pkg.overrideAttrs (_: { meta = { }; }));
 
-        packageName = "textql-hs";
+        packageName = "eatsy-hs";
       in {
         packages.${packageName} =
           haskellPackages.callCabal2nix packageName self rec {
@@ -37,7 +37,13 @@
             cabal-install
             zlib
             zlib.dev
+            dbeaver
+            beekeeper-studio
+            haskellPackages.yesod-bin
           ];
+          shellHook = ''
+           export NEURELO_KEY=$(cat neurelo_key)
+          '';
           inputsFrom = map (__getAttr "env") (__attrValues self.packages.${system});
         };
         devShell = self.devShells.${system}.default;
