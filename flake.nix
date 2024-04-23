@@ -42,7 +42,8 @@
             haskellPackages.yesod-bin
           ];
           shellHook = ''
-           export NEURELO_KEY=$(cat neurelo_key)
+              export NEURELO_KEY=$(cat neurelo_key)
+              export NEURELO_ENDPOINT="https://us-east-2.aws.neurelo.com"
           '';
           inputsFrom = map (__getAttr "env") (__attrValues self.packages.${system});
         };
