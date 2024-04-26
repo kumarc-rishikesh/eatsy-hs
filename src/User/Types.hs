@@ -5,7 +5,8 @@
 module User.Types (
   User(..),
   UsrCount(..),
-  UsrActive(..)
+  UsrActive(..),
+  UsrConn(..)
 ) where
 
 import qualified ConvertTypes as CT
@@ -54,3 +55,13 @@ newtype UsrActive = UsrActive
 instance ToJSON UsrActive where
     toJSON (UsrActive isActive') =
         object ["is_active" .= isActive']
+
+data UsrConn = UsrConn {
+    user1 :: Int,
+    user2 :: Int
+} deriving (Generic, Show)
+instance ToJSON UsrConn where 
+    toJSON (UsrConn usr1 usr2) = 
+        object ["user1" .= usr1 , "APPUSER" .= object ["connect" .= object ["user_id" .= usr2 ]]]
+    
+instance FromJSON UsrConn

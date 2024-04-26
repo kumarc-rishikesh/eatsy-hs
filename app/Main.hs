@@ -4,8 +4,8 @@ module Main where
 
 import qualified Web.Scotty as WS
 import Control.Monad.IO.Class(liftIO)
-import User.Actions(createUser, isUniqueUser, deactivateUser)
-import User.Types(User)
+import User.Actions(createUser, isUniqueUser, deactivateUser, createConn)
+import User.Types(User, UsrConn)
 import qualified Data.Text as T
 
 
@@ -25,11 +25,13 @@ main = do
                     WS.liftIO $ print resp  
                     WS.status resp
                 Nothing -> liftIO $ putStrLn "no input"
+        
         WS.post "/user/create" $ do
             usr <- WS.jsonData :: WS.ActionM User
             resp <- liftIO $ createUser usr
             WS.liftIO $ print resp  
             WS.status resp
+        
         WS.patch "/user/deactivate/username/:username" $ do
             maybeUname <- WS.pathParamMaybe "username" :: WS.ActionM (Maybe T.Text)
             case maybeUname of
@@ -38,3 +40,10 @@ main = do
                     WS.liftIO $ print resp  
                     WS.status resp
                 Nothing -> liftIO $ putStrLn "no input"
+
+        WS.post "/user/connect" $ do
+            usrsConn <- WS.jsonData :: WS.ActionM UsrConn
+            resp <- liftIO $ createConn usrsConn 
+            WS.liftIO $ print resp  
+            WS.status resp
+ 

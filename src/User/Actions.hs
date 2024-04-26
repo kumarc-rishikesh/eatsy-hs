@@ -3,7 +3,8 @@
 module User.Actions (
   createUser,
   isUniqueUser,
-  deactivateUser
+  deactivateUser,
+  createConn
 ) where
 
 import Network.HTTP.Types (Status, mkStatus)
@@ -21,7 +22,7 @@ createUser user = do
     neureloKey <- getEnv "NEURELO_KEY"
     neureloApi <- getEnv "NEURELO_ENDPOINT"
     let 
-        method = NS.parseRequest_ $ "POST " <> neureloApi <> "/rest/APPUSER/__one?"        
+        method = NS.parseRequest_ $ "POST " <> neureloApi <> "/rest/APPUSER/__one"        
         request' = setRequestBodyJSON user $ setRequestHeader "X-API-KEY" [B.pack neureloKey] method
     resp <- httpLBS request'
     pure $ getResponseStatus resp
@@ -53,5 +54,15 @@ deactivateUser userName = do
         reqBody = encode $ UT.UsrActive { UT.isActive = False }
         reqBody' = NS.setRequestBodyLBS reqBody method
         request' = setRequestHeaders [("Content-Type","application/json") , ("X-API-KEY", B.pack neureloKey )] reqBody'
+    resp <- httpLBS request'
+    pure $ getResponseStatus resp
+
+createConn :: UT.UsrConn -> IO Status
+createConn usrsConn = do
+    neureloKey <- getEnv "NEURELO_KEY"
+    neureloApi <- getEnv "NEURELO_ENDPOINT"
+    let 
+        method = NS.parseRequest_ $ "POST " <> neureloApi <> "/rest/USER_REL/__one"
+        request' = setRequestBodyJSON usrsConn $ setRequestHeader "X-API-KEY" [B.pack neureloKey] method
     resp <- httpLBS request'
     pure $ getResponseStatus resp
