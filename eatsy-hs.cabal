@@ -18,7 +18,7 @@ common warnings
 
 library
     import:           warnings
-    exposed-modules:  User.Actions, User.Types
+    exposed-modules:  User.Actions, User.Types, Syskeys
     other-modules: ConvertTypes
     -- other-extensions:
     build-depends:    base

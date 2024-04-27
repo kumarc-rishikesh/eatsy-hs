@@ -24,7 +24,7 @@ data User = User {
 instance ToJSON User
 
 instance FromJSON User where
-    parseJSON = withObject "UserW" $ \obj -> do
+    parseJSON = withObject "User" $ \obj -> do
         username_ <- strip <$> obj .: "username"
         user_email_ <- strip <$> obj .: "user_email"
         user_pw_ <- strip <$> obj .: "user_pw"
