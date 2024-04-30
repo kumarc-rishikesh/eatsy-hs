@@ -4,6 +4,8 @@ import qualified Web.Scotty as WS
 import Control.Monad.IO.Class(liftIO)
 import User.Actions(createUser, isUniqueUser, deactivateUser, createConn)
 import User.Types(User, UsrConn)
+import Post.Actions(createPost)
+import Post.Types(Post)
 import qualified Data.Text as T
 import Syskeys (getKeys)
 
@@ -46,4 +48,12 @@ main = do
             resp <- liftIO $ createConn syskeys usrsConn 
             WS.liftIO $ print resp  
             WS.status resp
- 
+
+-----------------------------------------------------------------------------------
+---------------------------------POST ENDPOINTS------------------------------------
+-----------------------------------------------------------------------------------
+        WS.post "/post/create" $ do
+            post <- WS.jsonData :: WS.ActionM Post
+            resp <- liftIO $ createPost syskeys post
+            WS.liftIO $ print resp 
+            WS.status resp

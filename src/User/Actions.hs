@@ -12,6 +12,7 @@ import qualified Network.HTTP.Simple as NS
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString.Lazy.Char8 as BLC
+import Control.Monad (when)
 import Data.Text (Text, unpack)
 import Data.Aeson
 import Control.Exception (throwIO)
@@ -26,15 +27,12 @@ createUser sk user = do
     let 
         method = NS.parseRequest_ $ "POST " <>  SK.neureloEndpoint sk  <> "/rest/APPUSER/__one"        
         request' = NS.setRequestBodyJSON user $ NS.setRequestHeader "X-API-KEY" [B.pack $ SK.neureloKey sk] method
-    resp <- NS.httpLBS request'
-    if NS.getResponseStatusCode resp == 201
-        then do
-            usrId <- getUsrIDFromResp $ NS.getResponseBody resp
-            -- TODO : add logic to handle if user is created but not connected with the same user
-            _ <- createConn sk (UT.UsrConn (UT.userId usrId) (UT.userId usrId))
-            pure ()
-        else 
-            pure ()            
+    resp <- NS.httpLBS request' 
+    when (NS.getResponseStatusCode resp ==201) $ do
+        usrId <- getUsrIDFromResp $ NS.getResponseBody resp
+        -- TODO : add logic to handle if user is created but not connected with the same user
+        _ <- createConn sk (UT.UsrConn (UT.userId usrId) (UT.userId usrId))
+        pure()
     pure $ NS.getResponseStatus resp
     where 
         getUsrIDFromResp :: BLC.ByteString -> IO UT.UsrId
