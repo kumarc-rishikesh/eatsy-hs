@@ -4,7 +4,8 @@ module User.Actions (
   createUser,
   isUniqueUser,
   deactivateUser,
-  createConn
+  createConn,
+  getUserConnections
 ) where
 
 import Network.HTTP.Types (Status, mkStatus)
@@ -15,6 +16,7 @@ import qualified Data.ByteString.Lazy.Char8 as BLC
 import Control.Monad (when)
 import Data.Text (Text, unpack)
 import Data.Aeson
+import Data.Aeson.Types(parseMaybe)
 import Control.Exception (throwIO)
 
 
@@ -73,3 +75,25 @@ createConn sk usrsConn = do
         request' = NS.setRequestBodyJSON usrsConn $ NS.setRequestHeader "X-API-KEY" [B.pack $ SK.neureloKey sk] method
     resp <- NS.httpLBS request'
     pure $ NS.getResponseStatus resp
+
+getUserConnections :: SK.SysKeys -> Int -> IO (Maybe [Int])
+getUserConnections sk user1 = do
+    let 
+        method = NS.parseRequest_ $ "GET " <> SK.neureloEndpoint sk  <> "/rest/USER_REL"
+        request = NS.setRequestHeader "X-API-KEY" [B.pack $ SK.neureloKey sk] method
+        queryParamArr = [("select", Just "{\"user2\":true}"), 
+            ("filter", Just $ B.pack $ "{\"user1\":{\"equals\":" <> show user1 <> "}}")]
+        request' = NS.setRequestQueryString queryParamArr request
+    resp <- NS.httpLBS request'
+    let 
+        parsedResp = decode $ NS.getResponseBody resp :: Maybe Object
+        userConns = parsedResp >>= parseMaybe (.: "data") :: Maybe [UT.UserConn] 
+        extractUsr :: [UT.UserConn] -> [Int]
+        extractUsr = map UT.usr
+    case userConns of
+        Just userConnList -> do
+            pure $ Just $ extractUsr userConnList
+        Nothing -> do 
+            putStrLn "Failed to parse JSON or extract user connections"
+            pure Nothing
+            

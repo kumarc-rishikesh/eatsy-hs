@@ -4,7 +4,7 @@ import qualified Web.Scotty as WS
 import Control.Monad.IO.Class(liftIO)
 import User.Actions(createUser, isUniqueUser, deactivateUser, createConn)
 import User.Types(User, UsrConn)
-import Post.Actions(createPost)
+import Post.Actions(createPost, getUsrPosts)
 import Post.Types(Post)
 import qualified Data.Text as T
 import Syskeys (getKeys)
@@ -57,3 +57,17 @@ main = do
             resp <- liftIO $ createPost syskeys post
             WS.liftIO $ print resp 
             WS.status resp
+
+        WS.get "/post/getall" $ do
+            maybeUsr1 <- WS.queryParamMaybe "user1" :: WS.ActionM (Maybe Int)
+            maybeUsr2 <- WS.queryParamMaybe "user2" :: WS.ActionM (Maybe Int)
+            case (maybeUsr1,maybeUsr2) of 
+                (Nothing, _) -> liftIO $ putStrLn "user1 input not provided"
+                (_, Nothing) -> liftIO $ putStrLn "user2 input not provided"
+                (Just usr1, Just usr2) -> do
+                    maybePosts <- liftIO $ getUsrPosts syskeys usr1 usr2
+                    case maybePosts of 
+                        Just posts -> do 
+                            liftIO $ print posts
+                        Nothing -> 
+                            liftIO $ putStrLn "Not connected or posts could not be parsed" 

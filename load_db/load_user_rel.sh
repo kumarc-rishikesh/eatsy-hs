@@ -1,0 +1,23 @@
+#!/bin/bash
+
+curl -X POST -d '{"user1" : 3, "user2" : 2}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 9, "user2" : 1}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 7, "user2" : 5}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 2, "user2" : 10}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 5, "user2" : 4}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 4, "user2" : 6}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 1, "user2" : 8}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 10, "user2" : 9}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 6, "user2" : 5}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 8, "user2" : 7}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 3, "user2" : 2}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 7, "user2" : 1}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 4, "user2" : 3}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 5, "user2" : 6}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 2, "user2" : 9}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 1, "user2" : 8}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 10, "user2" : 7}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 8, "user2" : 4}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 6, "user2" : 3}' "http://localhost:3000/user/connect"
+curl -X POST -d '{"user1" : 9, "user2" : 5}' "http://localhost:3000/user/connect"
+

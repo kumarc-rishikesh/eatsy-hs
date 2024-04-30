@@ -7,7 +7,8 @@ module User.Types (
   UsrCount(..),
   UsrActive(..),
   UsrConn(..),
-  UsrId(..)
+  UsrId(..),
+  UserConn(..)
 ) where
 
 import qualified ConvertTypes as CT
@@ -75,3 +76,11 @@ instance FromJSON UsrId where
     parseJSON = withObject "UsrId" $ \v -> do 
         dataObj <- v .: "data"
         UsrId <$> dataObj .: "user_id"
+
+newtype UserConn = UserConn {
+    usr :: Int
+} deriving(Generic,Show)
+instance FromJSON UserConn where
+    parseJSON = withObject "UsrConn" $ \obj -> do
+        usr_ <- obj .: "user2"
+        return $ UserConn usr_
