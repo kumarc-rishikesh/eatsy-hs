@@ -2,6 +2,7 @@
 
 import qualified Web.Scotty as WS
 import Control.Monad.IO.Class(liftIO)
+import Network.HTTP.Types(ok200,badRequest400)
 import User.Actions(createUser, isUniqueUser, deactivateUser, createConn)
 import User.Types(User, UsrConn)
 import Post.Actions(createPost, getUsrPosts)
@@ -26,7 +27,9 @@ main = do
                     resp <- liftIO $ isUniqueUser syskeys param                               
                     WS.liftIO $ print resp  
                     WS.status resp
-                Nothing -> liftIO $ putStrLn "no input"
+                Nothing -> do
+                    WS.status badRequest400
+                    WS.text "no input"
         
         WS.post "/user/create" $ do
             usr <- WS.jsonData :: WS.ActionM User
@@ -41,7 +44,10 @@ main = do
                     resp <- liftIO $ deactivateUser syskeys uname
                     WS.liftIO $ print resp  
                     WS.status resp
-                Nothing -> liftIO $ putStrLn "no input"
+                    WS.text "User deactivated!"
+                Nothing -> do
+                    WS.status badRequest400
+                    WS.text "username input not provided"
 
         WS.post "/user/connect" $ do
             usrsConn <- WS.jsonData :: WS.ActionM UsrConn
@@ -62,12 +68,18 @@ main = do
             maybeUsr1 <- WS.queryParamMaybe "user1" :: WS.ActionM (Maybe Int)
             maybeUsr2 <- WS.queryParamMaybe "user2" :: WS.ActionM (Maybe Int)
             case (maybeUsr1,maybeUsr2) of 
-                (Nothing, _) -> liftIO $ putStrLn "user1 input not provided"
-                (_, Nothing) -> liftIO $ putStrLn "user2 input not provided"
+                (Nothing, _) -> do
+                    WS.status badRequest400
+                    WS.text "user1 input not provided"              
+                (_, Nothing) -> do
+                    WS.status badRequest400
+                    WS.text "user2 input not provided"
                 (Just usr1, Just usr2) -> do
                     maybePosts <- liftIO $ getUsrPosts syskeys usr1 usr2
                     case maybePosts of 
                         Just posts -> do 
-                            liftIO $ print posts
-                        Nothing -> 
-                            liftIO $ putStrLn "Not connected or posts could not be parsed" 
+                            WS.status ok200
+                            WS.json posts
+                        Nothing -> do
+                            WS.status badRequest400
+                            WS.text "Not connected or posts could not be parsed" 
