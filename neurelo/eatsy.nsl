@@ -1,0 +1,156 @@
+{
+  "objects": {
+    "APPUSER": {
+      "properties": {
+        "POSTS": {
+          "type": "array",
+          "items": {
+            "$ref": "#/objects/POSTS"
+          }
+        },
+        "USER_REL": {
+          "type": "array",
+          "items": {
+            "$ref": "#/objects/USER_REL"
+          }
+        },
+        "country": {
+          "type": "string"
+        },
+        "dob": {
+          "type": "string",
+          "format": "date-time",
+          "sourceType": "Date"
+        },
+        "is_active": {
+          "type": "boolean",
+          "default": {
+            "value": true
+          }
+        },
+        "user_email": {
+          "type": "string",
+          "unique": true
+        },
+        "user_id": {
+          "type": "integer",
+          "default": {
+            "function": "autoincrement"
+          },
+          "identifier": true
+        },
+        "user_pw": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string",
+          "unique": true
+        }
+      }
+    },
+    "POSTS": {
+      "properties": {
+        "APPUSER": {
+          "$ref": "#/objects/APPUSER",
+          "relation": {
+            "attrKey": [
+              "appuser_user_id"
+            ],
+            "foreignAttrKey": [
+              "user_id"
+            ],
+            "onUpdate": "NoAction",
+            "onDelete": "NoAction"
+          }
+        },
+        "appuser_user_id": {
+          "type": "integer"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "sourceType": [
+            "Timestamp",
+            6
+          ],
+          "default": {
+            "function": "now"
+          }
+        },
+        "post_id": {
+          "type": "integer",
+          "default": {
+            "function": "autoincrement"
+          },
+          "identifier": true
+        },
+        "steps": {
+          "type": "string",
+          "sourceType": [
+            "VarChar",
+            255
+          ]
+        },
+        "title": {
+          "type": "string",
+          "sourceType": [
+            "VarChar",
+            50
+          ]
+        },
+        "url": {
+          "type": "string",
+          "sourceType": [
+            "VarChar",
+            255
+          ]
+        }
+      }
+    },
+    "USER_REL": {
+      "properties": {
+        "APPUSER": {
+          "$ref": "#/objects/APPUSER",
+          "relation": {
+            "attrKey": [
+              "user2"
+            ],
+            "foreignAttrKey": [
+              "user_id"
+            ],
+            "onUpdate": "NoAction",
+            "onDelete": "NoAction"
+          }
+        },
+        "conn_id": {
+          "type": "integer",
+          "default": {
+            "function": "autoincrement"
+          }
+        },
+        "rel_ts": {
+          "type": "string",
+          "format": "date-time",
+          "default": {
+            "function": "now"
+          }
+        },
+        "user1": {
+          "type": "integer"
+        },
+        "user2": {
+          "type": "integer"
+        }
+      },
+      "constraints": [
+        {
+          "type": "identifier",
+          "property": [
+            "user1",
+            "user2"
+          ]
+        }
+      ]
+    }
+  }
+}
