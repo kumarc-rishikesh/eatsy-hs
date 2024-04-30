@@ -44,7 +44,6 @@ main = do
                     resp <- liftIO $ deactivateUser syskeys uname
                     WS.liftIO $ print resp  
                     WS.status resp
-                    WS.text "User deactivated!"
                 Nothing -> do
                     WS.status badRequest400
                     WS.text "username input not provided"

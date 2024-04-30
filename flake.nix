@@ -40,6 +40,7 @@
             dbeaver
             beekeeper-studio
             haskellPackages.yesod-bin
+            jq
           ];
           shellHook = ''
               export NEURELO_KEY=$(cat neurelo_key)
