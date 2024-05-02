@@ -8,19 +8,20 @@ module Post.Actions (
 import Network.HTTP.Types (Status)
 import qualified Network.HTTP.Simple as NS
 import qualified Data.ByteString.Char8 as B
+import qualified Data.ByteString.Lazy.Char8 as BLC
 import User.Actions(getUserConnections)
 import Data.Aeson.Types(parseMaybe)
 import Data.Aeson
 import qualified Post.Types as PT 
 import qualified Syskeys as SK
 
-createPost :: SK.SysKeys -> PT.Post -> IO Status
+createPost :: SK.SysKeys -> PT.Post -> IO (Status, BLC.ByteString)
 createPost sk post = do
     let 
         method = NS.parseRequest_ $ "POST " <> SK.neureloEndpoint sk <> "/rest/POSTS/__one"
         request' = NS.setRequestBodyJSON post $ NS.setRequestHeader "X-API-KEY" [B.pack $ SK.neureloKey sk] method
     resp <- NS.httpLBS request'
-    pure $ NS.getResponseStatus resp
+    pure (NS.getResponseStatus resp, NS.getResponseBody resp)
 
 getUsrPosts :: SK.SysKeys -> Int -> Int -> IO (Maybe [PT.OPPost])
 getUsrPosts sk usr1 usr2 = do

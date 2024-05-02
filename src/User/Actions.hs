@@ -8,7 +8,7 @@ module User.Actions (
   getUserConnections
 ) where
 
-import Network.HTTP.Types (Status, mkStatus)
+import Network.HTTP.Types (Status, ok200, badRequest400)
 import qualified Network.HTTP.Simple as NS
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Text.Encoding as TE
@@ -24,7 +24,7 @@ import qualified User.Types as UT
 import qualified Syskeys as SK
 
 
-createUser :: SK.SysKeys -> UT.User -> IO Status
+createUser :: SK.SysKeys -> UT.User -> IO (Status, BLC.ByteString)
 createUser sk user = do
     let 
         method = NS.parseRequest_ $ "POST " <>  SK.neureloEndpoint sk  <> "/rest/APPUSER/__one"        
@@ -35,14 +35,14 @@ createUser sk user = do
         -- TODO : add logic to handle if user is created but not connected with the same user
         _ <- createConn sk (UT.UsrConn (UT.userId usrId) (UT.userId usrId))
         pure()
-    pure $ NS.getResponseStatus resp
+    pure (NS.getResponseStatus resp, NS.getResponseBody resp)
     where 
         getUsrIDFromResp :: BLC.ByteString -> IO UT.UsrId
         getUsrIDFromResp resp = case eitherDecode resp of
             Left err -> throwIO $ userError $ "Error decoding JSON: " ++ err
             Right usrId -> return usrId
 
-isUniqueUser :: SK.SysKeys -> Text -> IO Status
+isUniqueUser :: SK.SysKeys -> Text -> IO (Status, Text)
 isUniqueUser sk userName = do
     let
         method = NS.parseRequest_ $ "GET " <> SK.neureloEndpoint sk  <> "/custom/getUserCountUName"
@@ -53,11 +53,11 @@ isUniqueUser sk userName = do
     case (decode $ NS.getResponseBody resp :: Maybe UT.UsrCount) of
         Just (UT.UsrCount count) -> 
             case count of
-                "0" -> pure $ mkStatus 200 "Unique"
-                _   -> pure $ mkStatus 200 "Non-Unique"
-        _ -> pure $ mkStatus 400 "Bad Request"
+                "0" -> pure (ok200, "Unique")
+                _   -> pure (ok200, "Non-Unique")
+        _ -> pure (badRequest400, "Bad Request")
 
-deactivateUser :: SK.SysKeys -> Text -> IO Status
+deactivateUser :: SK.SysKeys -> Text -> IO (Status, BLC.ByteString)
 deactivateUser sk userName = do
     let
         patchFilter = "/username/" <> userName
@@ -66,15 +66,15 @@ deactivateUser sk userName = do
         reqBody' = NS.setRequestBodyLBS reqBody method
         request' = NS.setRequestHeaders [("Content-Type","application/json") , ("X-API-KEY", B.pack $ SK.neureloKey sk )] reqBody'
     resp <- NS.httpLBS request'
-    pure $ NS.getResponseStatus resp
+    pure (NS.getResponseStatus resp, NS.getResponseBody resp)
 
-createConn :: SK.SysKeys -> UT.UsrConn -> IO Status
+createConn :: SK.SysKeys -> UT.UsrConn -> IO (Status, BLC.ByteString)
 createConn sk usrsConn = do
     let 
         method = NS.parseRequest_ $ "POST " <> SK.neureloEndpoint sk <> "/rest/USER_REL/__one"
         request' = NS.setRequestBodyJSON usrsConn $ NS.setRequestHeader "X-API-KEY" [B.pack $ SK.neureloKey sk] method
     resp <- NS.httpLBS request'
-    pure $ NS.getResponseStatus resp
+    pure (NS.getResponseStatus resp, NS.getResponseBody resp)
 
 getUserConnections :: SK.SysKeys -> Int -> IO (Maybe [Int])
 getUserConnections sk user1 = do
