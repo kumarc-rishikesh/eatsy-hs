@@ -98,8 +98,7 @@ To run this project locally, follow these steps:
   - `400 Bad Request` if there are validation errors or the user1 does not have a connection with user2.
 
 ##TODO:
-1. Delete connection if user deactivates
-2. Authorization
+1. Deactivate connection if user deactivates
 3. Get a specific post
 4. Delete a post
 5. Add Likes to a post

@@ -8,7 +8,9 @@ module User.Types (
   UsrActive(..),
   UsrConn(..),
   UsrId(..),
-  UserConn(..)
+  UsrConn2(..),
+  UsrCreds(..),
+  IpUsrCreds(..)
 ) where
 
 import qualified ConvertTypes as CT
@@ -65,22 +67,50 @@ data UsrConn = UsrConn {
 instance ToJSON UsrConn where 
     toJSON (UsrConn usr1 usr2) = 
         object ["user1" .= usr1 , "APPUSER" .= object ["connect" .= object ["user_id" .= usr2 ]]]
-    
 instance FromJSON UsrConn
 
-newtype UsrId = UsrId
-  {
+newtype UsrConn2 = UsrConn2 {
+    usr :: Int
+} deriving(Generic,Show)
+instance FromJSON UsrConn2 where
+    parseJSON = withObject "UsrConn2" $ \obj -> do
+        usr_ <- obj .: "user2"
+        return $ UsrConn2 usr_
+
+newtype UsrId = UsrId {
     userId :: Int
 } deriving (Generic, Show)
 instance FromJSON UsrId where 
     parseJSON = withObject "UsrId" $ \v -> do 
         dataObj <- v .: "data"
-        UsrId <$> dataObj .: "user_id"
+        case dataObj of
+            [obj]-> do
+                usrId_ <- obj .: "user_id"
+                pure $ UsrId usrId_  
+            _ -> fail "Unexpected user_id response"
 
-newtype UserConn = UserConn {
-    usr :: Int
-} deriving(Generic,Show)
-instance FromJSON UserConn where
-    parseJSON = withObject "UsrConn" $ \obj -> do
-        usr_ <- obj .: "user2"
-        return $ UserConn usr_
+data IpUsrCreds = IpUsrCreds{
+    usrEmailIp :: Text,
+    usrPwIp :: Text
+} deriving (Generic,Show)
+instance FromJSON IpUsrCreds where
+    parseJSON = withObject "IpUsrCreds" $ \obj -> do
+        usrEmailIp_ <- obj .: "user_email"
+        usrPwIp_ <- obj .: "user_pw"
+        return $ IpUsrCreds usrEmailIp_  usrPwIp_
+
+data UsrCreds = UsrCreds{
+    userIdCred :: Int,
+    userEmailCred :: Text,
+    userPwCred :: Text,
+    userNameCred :: Text
+} deriving (Generic, Show)
+instance FromJSON UsrCreds where 
+    parseJSON = withObject "UsrCreds" $ \v -> do
+        dataObj <- v .: "data"
+        userIdCred_ <- dataObj .: "user_id"
+        userEmailCred_ <- dataObj .: "user_email"
+        userPwCred_ <- dataObj .: "user_pw"
+        userNameCred_ <- dataObj .: "username"
+        return $ UsrCreds userIdCred_ userEmailCred_ userPwCred_ userNameCred_
+instance ToJSON UsrCreds 

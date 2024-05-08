@@ -3,8 +3,8 @@
 import qualified Web.Scotty as WS
 import Control.Monad.IO.Class(liftIO)
 import Network.HTTP.Types (ok200,badRequest400)
-import User.Actions(createUser, isUniqueUser, deactivateUser, createConn)
-import User.Types(User, UsrConn)
+import User.Actions(createUser, isUniqueUser, deactivateUser, createConn, validateCreds)
+import User.Types(User, UsrConn, IpUsrCreds)
 import Post.Actions(createPost, getUsrPosts)
 import Post.Types(Post)
 import qualified Data.Text as T
@@ -54,6 +54,20 @@ main = do
                 Nothing -> do
                     WS.status badRequest400
                     WS.text "username input not provided"
+        
+        WS.post "/login" $ do
+            usrCreds <- WS.jsonData :: WS.ActionM IpUsrCreds
+            (respStatus, maybeRespBody) <- liftIO $ validateCreds syskeys usrCreds
+            liftIO $ print respStatus
+            case maybeRespBody of 
+                Just respBody -> do
+                    WS.liftIO $ print respBody
+                    WS.status respStatus
+                    WS.setHeader "Content-Type" "application/json"
+                    WS.json respBody
+                _ -> do
+                    WS.status respStatus
+                    WS.text "Not Authorised"
 
         WS.post "/user/connect" $ do
             usrsConn <- WS.jsonData :: WS.ActionM UsrConn

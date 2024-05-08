@@ -5,10 +5,11 @@ module User.Actions (
   isUniqueUser,
   deactivateUser,
   createConn,
-  getUserConnections
+  getUserConnections,
+  validateCreds
 ) where
 
-import Network.HTTP.Types (Status, ok200, badRequest400)
+import Network.HTTP.Types (Status, ok200, badRequest400, unauthorized401)
 import qualified Network.HTTP.Simple as NS
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Text.Encoding as TE
@@ -32,7 +33,6 @@ createUser sk user = do
     resp <- NS.httpLBS request' 
     when (NS.getResponseStatusCode resp ==201) $ do
         usrId <- getUsrIDFromResp $ NS.getResponseBody resp
-        -- TODO : add logic to handle if user is created but not connected with the same user
         _ <- createConn sk (UT.UsrConn (UT.userId usrId) (UT.userId usrId))
         pure()
     pure (NS.getResponseStatus resp, NS.getResponseBody resp)
@@ -56,6 +56,39 @@ isUniqueUser sk userName = do
                 "0" -> pure (ok200, "Unique")
                 _   -> pure (ok200, "Non-Unique")
         _ -> pure (badRequest400, "Bad Request")
+
+getUserId :: SK.SysKeys -> Text -> IO (Maybe Int)
+getUserId sk userEmail = do
+    let
+        method = NS.parseRequest_ $ "GET " <> SK.neureloEndpoint sk <> "/custom/getUserIDEmail"
+        request = NS.setRequestHeader "X-API-KEY" [ B.pack $ SK.neureloKey sk ] method
+        queryItem = ( "ip_user_email", Just (TE.encodeUtf8 userEmail))
+        request' = NS.setRequestQueryString [queryItem] request
+    resp <- NS.httpLBS request'
+    case (decode $ NS.getResponseBody resp :: Maybe UT.UsrId) of
+        Just usrId ->
+            pure (Just $ UT.userId usrId)
+        _ -> pure Nothing
+
+validateCreds :: SK.SysKeys -> UT.IpUsrCreds -> IO (Status, Maybe UT.UsrCreds)
+validateCreds sk ipUsrCreds = do 
+    userId <- getUserId sk (UT.usrEmailIp ipUsrCreds)
+    case userId of 
+        Just uid -> do
+            let 
+                method = NS.parseRequest_ $ "GET " <>SK.neureloEndpoint sk <> "/rest/APPUSER/" <> show uid 
+                request' = NS.setRequestHeader "X-API-KEY" [ B.pack $ SK.neureloKey sk ] method
+            resp <- NS.httpLBS request'
+            case (decode $ NS.getResponseBody resp :: Maybe UT.UsrCreds) of
+                Just cred -> do
+                    print cred
+                    if UT.userPwCred cred == UT.usrPwIp ipUsrCreds
+                    then
+                        pure (ok200, Just cred)
+                    else 
+                        pure (unauthorized401, Nothing)
+                _ -> pure (badRequest400,Nothing)
+        _ -> pure (badRequest400, Nothing)    
 
 deactivateUser :: SK.SysKeys -> Text -> IO (Status, BLC.ByteString)
 deactivateUser sk userName = do
@@ -87,8 +120,8 @@ getUserConnections sk user1 = do
     resp <- NS.httpLBS request'
     let 
         parsedResp = decode $ NS.getResponseBody resp :: Maybe Object
-        userConns = parsedResp >>= parseMaybe (.: "data") :: Maybe [UT.UserConn] 
-        extractUsr :: [UT.UserConn] -> [Int]
+        userConns = parsedResp >>= parseMaybe (.: "data") :: Maybe [UT.UsrConn2] 
+        extractUsr :: [UT.UsrConn2] -> [Int]
         extractUsr = map UT.usr
     case userConns of
         Just userConnList -> do
