@@ -31,7 +31,7 @@ To run this project locally, follow these steps:
 
 #### Check Username Availability
 
-- **Endpoint:** `/uname/check`
+- **Endpoint:** `/check/uname`
 - **Method:** `GET`
 - **Description:** Checks if a username is available.
 - **Parameters:**
