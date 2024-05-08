@@ -3,7 +3,7 @@
 import qualified Web.Scotty as WS
 import Control.Monad.IO.Class(liftIO)
 import Network.HTTP.Types (ok200,badRequest400)
-import User.Actions(createUser, isUniqueUser, deactivateUser, createConn, validateCreds)
+import User.Actions(createUser, isUniqueUser, deactivateUser, createConn, validateCreds, getUserId)
 import User.Types(User, UsrConn, IpUsrCreds)
 import Post.Actions(createPost, getUsrPosts)
 import Post.Types(Post)
@@ -20,7 +20,7 @@ main = do
 -----------------------------------------------------------------------------------
 ---------------------------------USER ENDPOINTS------------------------------------
 -----------------------------------------------------------------------------------
-        WS.get "/uname/check" $ do
+        WS.get "/check/uname" $ do
             maybeQ <- WS.queryParamMaybe "ip_username" :: WS.ActionM (Maybe T.Text)
             case maybeQ of 
                 Just param -> do
@@ -33,6 +33,22 @@ main = do
                     WS.status badRequest400
                     WS.text "no input"
         
+        WS.get "/check/useremail" $ do
+            maybeQ <- WS.queryParamMaybe "ip_user_email" :: WS.ActionM (Maybe T.Text)
+            case maybeQ of
+                Just param -> do
+                    user <- liftIO $ getUserId syskeys param
+                    case user of 
+                        Just _ -> do
+                            WS.status ok200
+                            WS.text "Email exists"
+                        Nothing -> do
+                            WS.status ok200
+                            WS.text "Email does not exist"
+                Nothing -> do
+                    WS.status badRequest400
+                    WS.text "no input"
+        
         WS.post "/user/create" $ do
             usr <- WS.jsonData :: WS.ActionM User
             (respStatus, respBody) <- liftIO $ createUser syskeys usr
@@ -40,7 +56,6 @@ main = do
             WS.status respStatus
             WS.setHeader "Content-Type" "application/json"
             WS.raw respBody  
-            
         
         WS.patch "/user/deactivate/username/:username" $ do
             maybeUname <- WS.pathParamMaybe "username" :: WS.ActionM (Maybe T.Text)

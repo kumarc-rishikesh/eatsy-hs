@@ -6,6 +6,7 @@ module User.Actions (
   deactivateUser,
   createConn,
   getUserConnections,
+  getUserId,
   validateCreds
 ) where
 
