@@ -1,3 +1,4 @@
+
 # Eatsy!
 
 ## Overview
@@ -40,6 +41,17 @@ To run this project locally, follow these steps:
   - `200 OK` if the username is available.
   - `400 Bad Request` if no username is provided or the username is taken.
 
+#### Check If Email Exists
+
+- **Endpoint:** `/check/useremail`
+- **Method:** `GET`
+- **Description:** Checks if an email is already being used.
+- **Parameters:**
+  - `ip_user_email` (query parameter): The user email to check.
+- **Response:**
+  - `200 OK` if the exists or does not exist.
+  - `400 Bad Request` if no exer email is provided.
+
 #### Create User
 
 - **Endpoint:** `/user/create`
@@ -70,6 +82,18 @@ To run this project locally, follow these steps:
 - **Response:**
   - `200 OK` if the user connection is created successfully.
   - `400 Bad Request` if there are validation errors or the user already exists.
+
+#### UserLogin
+
+- **Endpoint:** `/login`
+- **Method:** `POST`
+- **Description:** Login for a user.
+- **Body:** JSON object with the user email and password.
+- **Response:**
+  - `200 OK` if the credentials match those stored.
+  - `400 Bad Request` if the email does not exist.
+  - `401 Unauthorised` if the password does not match.
+
 
 ### Post Endpoints
 
