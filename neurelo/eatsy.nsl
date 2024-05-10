@@ -50,6 +50,13 @@
     },
     "POSTS": {
       "properties": {
+        "is_active": {
+          "type": "boolean",
+          "description": "Posts are deactivated if a user deactivates or if a user decides to \"Archive\" the post",
+          "default": {
+            "value": true
+          }
+        },
         "APPUSER": {
           "$ref": "#/objects/APPUSER",
           "relation": {
@@ -109,6 +116,13 @@
     },
     "USER_REL": {
       "properties": {
+        "is_active": {
+          "type": "boolean",
+          "description": "connections are deactivated if either user deactivates their acc",
+          "default": {
+            "value": true
+          }
+        },
         "APPUSER": {
           "$ref": "#/objects/APPUSER",
           "relation": {
