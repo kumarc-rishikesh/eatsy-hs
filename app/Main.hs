@@ -57,8 +57,8 @@ main = do
             WS.setHeader "Content-Type" "application/json"
             WS.raw respBody  
         
-        WS.patch "/user/deactivate/username/:username" $ do
-            maybeUname <- WS.pathParamMaybe "username" :: WS.ActionM (Maybe T.Text)
+        WS.patch "/user/deactivate/user_id/:user_id" $ do
+            maybeUname <- WS.pathParamMaybe "user_id" :: WS.ActionM (Maybe Int)
             case maybeUname of
                 Just uname -> do 
                     (respStatus, respBody) <- liftIO $ deactivateUser syskeys uname

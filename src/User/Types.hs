@@ -5,7 +5,7 @@
 module User.Types (
   User(..),
   UsrCount(..),
-  UsrActive(..),
+  ActiveStatus(..),
   UsrConn(..),
   UsrId(..),
   UsrConn2(..),
@@ -52,12 +52,12 @@ instance FromJSON UsrCount  where
             _ -> fail "Expected array with a single object"
 
 
-newtype UsrActive = UsrActive
+newtype ActiveStatus = ActiveStatus
     { isActive :: Bool
     } deriving (Generic, Show)
 
-instance ToJSON UsrActive where
-    toJSON (UsrActive isActive') =
+instance ToJSON ActiveStatus where
+    toJSON (ActiveStatus isActive') =
         object ["is_active" .= isActive']
 
 data UsrConn = UsrConn {

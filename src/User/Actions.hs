@@ -16,7 +16,7 @@ import qualified Data.ByteString.Char8 as B
 import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString.Lazy.Char8 as BLC
 import Control.Monad (when)
-import Data.Text (Text, unpack)
+import Data.Text (Text)
 import Data.Aeson
 import Data.Aeson.Types(parseMaybe)
 import Control.Exception (throwIO)
@@ -89,18 +89,36 @@ validateCreds sk ipUsrCreds = do
                     else 
                         pure (unauthorized401, Nothing)
                 _ -> pure (badRequest400,Nothing)
-        _ -> pure (badRequest400, Nothing)    
+        _ -> pure (badRequest400, Nothing)
 
-deactivateUser :: SK.SysKeys -> Text -> IO (Status, BLC.ByteString)
-deactivateUser sk userName = do
+deactivateConn :: SK.SysKeys -> Int -> IO (Int, Status, BLC.ByteString)
+deactivateConn sk userId = do 
     let
-        patchFilter = "/username/" <> userName
-        method = NS.parseRequest_ $ "PATCH " <> SK.neureloEndpoint sk <> "/rest/APPUSER" <> unpack patchFilter
-        reqBody = encode $ UT.UsrActive { UT.isActive = False }
+        method = NS.parseRequest_ $ "PATCH " <> SK.neureloEndpoint sk <> "/rest/USER_REL/"
+        reqBody = encode $ UT.ActiveStatus { UT.isActive = False }
+        reqBody' = NS.setRequestBodyLBS reqBody method
+        qFilters = "{\"OR\":[{\"user1\":{\"equals\":" <> B.pack ( show userId) <> " }},{\"user2\":{\"equals\":" <> B.pack ( show userId) <> " }}]}"
+        queryParamArr = [("filter", Just qFilters)]
+        request = NS.setRequestQueryString queryParamArr reqBody'
+        request' = NS.setRequestHeader "X-API-KEY" [ B.pack $ SK.neureloKey sk ] request
+    resp <- NS.httpLBS request'
+    pure (NS.getResponseStatusCode resp, NS.getResponseStatus resp, NS.getResponseBody resp)
+
+deactivateUser :: SK.SysKeys -> Int -> IO (Status, BLC.ByteString)
+deactivateUser sk userId = do
+    let
+        method = NS.parseRequest_ $ "PATCH " <> SK.neureloEndpoint sk <> "/rest/APPUSER/" <> show userId
+        reqBody = encode $ UT.ActiveStatus { UT.isActive = False }
         reqBody' = NS.setRequestBodyLBS reqBody method
         request' = NS.setRequestHeaders [("Content-Type","application/json") , ("X-API-KEY", B.pack $ SK.neureloKey sk )] reqBody'
     resp <- NS.httpLBS request'
-    pure (NS.getResponseStatus resp, NS.getResponseBody resp)
+    case NS.getResponseStatusCode resp of
+        200 ->  do
+            (dConnCode, dConnStatus, dConnBody) <- deactivateConn sk userId
+            case dConnCode of
+                200 -> pure(ok200, "{ "<> NS.getResponseBody resp <> "," <> dConnBody <> " }")
+                _ -> pure (dConnStatus, dConnBody)        
+        _ -> pure (NS.getResponseStatus resp, NS.getResponseBody resp)
 
 createConn :: SK.SysKeys -> UT.UsrConn -> IO (Status, BLC.ByteString)
 createConn sk usrsConn = do
@@ -115,8 +133,9 @@ getUserConnections sk user1 = do
     let 
         method = NS.parseRequest_ $ "GET " <> SK.neureloEndpoint sk  <> "/rest/USER_REL"
         request = NS.setRequestHeader "X-API-KEY" [B.pack $ SK.neureloKey sk] method
+        qFilters = "{\"AND\":[{\"user1\":{\"equals\":" <> B.pack (show user1) <> "}},{\"is_active\":{\"equals\": true}}]}" :: B.ByteString
         queryParamArr = [("select", Just "{\"user2\":true}"), 
-            ("filter", Just $ B.pack $ "{\"user1\":{\"equals\":" <> show user1 <> "}}")]
+            ("filter", Just qFilters )]
         request' = NS.setRequestQueryString queryParamArr request
     resp <- NS.httpLBS request'
     let 

@@ -64,11 +64,11 @@ To run this project locally, follow these steps:
 
 #### Deactivate User
 
-- **Endpoint:** `/user/deactivate/username`
+- **Endpoint:** `/user/deactivate/user_id/{id}`
 - **Method:** `PATCH`
 - **Description:** Deactivates an existing user.
 - **Parameters:**
-  - `username` (query parameter): The username whose account is to be deactivated.
+  - `username` (query parameter): The user_id of the user whose account is to be deactivated.
   - **Response:**
   - `200 OK` if the user is deactivated successfully.
   - `400 Bad Request` if there are errors.
