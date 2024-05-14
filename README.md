@@ -122,13 +122,12 @@ To run this project locally, follow these steps:
   - `400 Bad Request` if there are validation errors or the user1 does not have a connection with user2.
 
 ##TODO:
-1. Deactivate connection if user deactivates
-3. Get a specific post
-4. Delete a post
-5. Add Likes to a post
-6. Add categories to a post
-7. add post types :
+1. Get a specific post
+2. Delete a post
+3. Add Likes to a post
+4. Add categories to a post
+5. add post types :
     - public (anyone can see the post)
     - connections (only connections can see the post)
     - shared_users_only (posts that can be shared to only specific users)
-8. Posts Feed
+6. Posts Feed
