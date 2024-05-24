@@ -26,9 +26,9 @@ library
     other-modules: ConvertTypes
     -- other-extensions:
     build-depends:    base
-                    , aeson ^>=2.2.1.0
-                    , bytestring ^>=0.12.1.0
-                    , text ^>=2.1.1
+                    , aeson
+                    , bytestring
+                    , text
                     , http-client ^>=0.7.17
                     , http-conduit ^>=2.3.8.3
                     , scotty ^>=0.22
@@ -49,9 +49,9 @@ executable eatsy-hs
     -- other-extensions:
     build-depends:    base
                     , eatsy-hs
-                    , aeson ^>=2.2.1.0
-                    , bytestring ^>=0.12.1.0
-                    , text ^>=2.1.1
+                    , aeson
+                    , bytestring
+                    , text
                     , http-client ^>=0.7.17
                     , http-conduit ^>=2.3.8.3
                     , scotty ^>=0.22

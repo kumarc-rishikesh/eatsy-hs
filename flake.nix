@@ -25,6 +25,7 @@
         packages.${packageName} =
           haskellPackages.callCabal2nix packageName self rec {
             # Dependency overrides go here
+            scotty = jailbreakUnbreak haskellPackages.scotty_0_22;
           };
 
         packages.default = self.packages.${system}.${packageName};
