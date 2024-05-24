@@ -24,16 +24,15 @@
       in {
         packages.${packageName} =
           haskellPackages.callCabal2nix packageName self rec {
-            # Dependency overrides go here
             scotty = jailbreakUnbreak haskellPackages.scotty_0_22;
           };
 
         packages.default = self.packages.${system}.${packageName};
         defaultPackage = self.packages.${system}.default;
-
+        
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            haskellPackages.haskell-language-server # you must build it with your ghc to work
+            haskellPackages.haskell-language-server
             ghcid
             cabal-install
             zlib

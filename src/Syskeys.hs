@@ -14,7 +14,7 @@ data SysKeys = SysKeys
 
 getKeys :: IO SysKeys
 getKeys = do 
-    nKey <- getEnv "NEURELO_KEY"
-    nApi <- getEnv "NEURELO_ENDPOINT"
+    nKey <- readFile "./neurelo_key"
+    let nApi = "https://us-east-2.aws.neurelo.com"
     let syskeys = SysKeys nKey nApi
     pure syskeys 
