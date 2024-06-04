@@ -20,10 +20,10 @@ library
     import:           warnings
     exposed-modules:  User.Actions
                     , User.Types
-                    , Syskeys
+                    , Utils
                     , Post.Types
                     , Post.Actions
-    other-modules: ConvertTypes
+    -- other-modules:
     -- other-extensions:
     build-depends:    base
                     , aeson

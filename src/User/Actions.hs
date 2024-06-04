@@ -23,14 +23,14 @@ import Control.Exception (throwIO)
 
 
 import qualified User.Types as UT
-import qualified Syskeys as SK
+import qualified Utils as U
 
 
-createUser :: SK.SysKeys -> UT.User -> IO (Status, BLC.ByteString)
+createUser :: U.SysKeys -> UT.User -> IO (Status, BLC.ByteString)
 createUser sk user = do
     let 
-        method = NS.parseRequest_ $ "POST " <>  SK.neureloEndpoint sk  <> "/rest/APPUSER/__one"        
-        request' = NS.setRequestBodyJSON user $ NS.setRequestHeader "X-API-KEY" [B.pack $ SK.neureloKey sk] method
+        method = NS.parseRequest_ $ "POST " <>  U.neureloEndpoint sk  <> "/rest/APPUSER/__one"        
+        request' = NS.setRequestBodyJSON user $ NS.setRequestHeader "X-API-KEY" [B.pack $ U.neureloKey sk] method
     resp <- NS.httpLBS request' 
     when (NS.getResponseStatusCode resp ==201) $ do
         usrId <- getUsrIDFromResp $ NS.getResponseBody resp
@@ -43,11 +43,11 @@ createUser sk user = do
             Left err -> throwIO $ userError $ "Error decoding JSON: " ++ err
             Right usrId -> return usrId
 
-isUniqueUser :: SK.SysKeys -> Text -> IO (Status, Text)
+isUniqueUser :: U.SysKeys -> Text -> IO (Status, Text)
 isUniqueUser sk userName = do
     let
-        method = NS.parseRequest_ $ "GET " <> SK.neureloEndpoint sk  <> "/custom/getUserCountUName"
-        request = NS.setRequestHeader "X-API-KEY" [ B.pack $ SK.neureloKey sk] method
+        method = NS.parseRequest_ $ "GET " <> U.neureloEndpoint sk  <> "/custom/getUserCountUName"
+        request = NS.setRequestHeader "X-API-KEY" [ B.pack $ U.neureloKey sk] method
         queryItem = ( "ip_username", Just (TE.encodeUtf8 userName))
         request' = NS.setRequestQueryString [queryItem] request
     resp <- NS.httpLBS request'
@@ -58,11 +58,11 @@ isUniqueUser sk userName = do
                 _   -> pure (ok200, "Non-Unique")
         _ -> pure (badRequest400, "Bad Request")
 
-getUserId :: SK.SysKeys -> Text -> IO (Maybe Int)
+getUserId :: U.SysKeys -> Text -> IO (Maybe Int)
 getUserId sk userEmail = do
     let
-        method = NS.parseRequest_ $ "GET " <> SK.neureloEndpoint sk <> "/custom/getUserIDEmail"
-        request = NS.setRequestHeader "X-API-KEY" [ B.pack $ SK.neureloKey sk ] method
+        method = NS.parseRequest_ $ "GET " <> U.neureloEndpoint sk <> "/custom/getUserIDEmail"
+        request = NS.setRequestHeader "X-API-KEY" [ B.pack $ U.neureloKey sk ] method
         queryItem = ( "ip_user_email", Just (TE.encodeUtf8 userEmail))
         request' = NS.setRequestQueryString [queryItem] request
     resp <- NS.httpLBS request'
@@ -71,14 +71,14 @@ getUserId sk userEmail = do
             pure (Just $ UT.userId usrId)
         _ -> pure Nothing
 
-validateCreds :: SK.SysKeys -> UT.IpUsrCreds -> IO (Status, Maybe UT.UsrCreds)
+validateCreds :: U.SysKeys -> UT.IpUsrCreds -> IO (Status, Maybe UT.UsrCreds)
 validateCreds sk ipUsrCreds = do 
     userId <- getUserId sk (UT.usrEmailIp ipUsrCreds)
     case userId of 
         Just uid -> do
             let 
-                method = NS.parseRequest_ $ "GET " <>SK.neureloEndpoint sk <> "/rest/APPUSER/" <> show uid 
-                request' = NS.setRequestHeader "X-API-KEY" [ B.pack $ SK.neureloKey sk ] method
+                method = NS.parseRequest_ $ "GET " <>U.neureloEndpoint sk <> "/rest/APPUSER/" <> show uid 
+                request' = NS.setRequestHeader "X-API-KEY" [ B.pack $ U.neureloKey sk ] method
             resp <- NS.httpLBS request'
             case (decode $ NS.getResponseBody resp :: Maybe UT.UsrCreds) of
                 Just cred -> do
@@ -91,26 +91,26 @@ validateCreds sk ipUsrCreds = do
                 _ -> pure (badRequest400,Nothing)
         _ -> pure (badRequest400, Nothing)
 
-deactivateConn :: SK.SysKeys -> Int -> IO (Int, Status, BLC.ByteString)
+deactivateConn :: U.SysKeys -> Int -> IO (Int, Status, BLC.ByteString)
 deactivateConn sk userId = do 
     let
-        method = NS.parseRequest_ $ "PATCH " <> SK.neureloEndpoint sk <> "/rest/USER_REL/"
+        method = NS.parseRequest_ $ "PATCH " <> U.neureloEndpoint sk <> "/rest/USER_REL/"
         reqBody = encode $ UT.ActiveStatus { UT.isActive = False }
         reqBody' = NS.setRequestBodyLBS reqBody method
         qFilters = "{\"OR\":[{\"user1\":{\"equals\":" <> B.pack ( show userId) <> " }},{\"user2\":{\"equals\":" <> B.pack ( show userId) <> " }}]}"
         queryParamArr = [("filter", Just qFilters)]
         request = NS.setRequestQueryString queryParamArr reqBody'
-        request' = NS.setRequestHeader "X-API-KEY" [ B.pack $ SK.neureloKey sk ] request
+        request' = NS.setRequestHeader "X-API-KEY" [ B.pack $ U.neureloKey sk ] request
     resp <- NS.httpLBS request'
     pure (NS.getResponseStatusCode resp, NS.getResponseStatus resp, NS.getResponseBody resp)
 
-deactivateUser :: SK.SysKeys -> Int -> IO (Status, BLC.ByteString)
+deactivateUser :: U.SysKeys -> Int -> IO (Status, BLC.ByteString)
 deactivateUser sk userId = do
     let
-        method = NS.parseRequest_ $ "PATCH " <> SK.neureloEndpoint sk <> "/rest/APPUSER/" <> show userId
+        method = NS.parseRequest_ $ "PATCH " <> U.neureloEndpoint sk <> "/rest/APPUSER/" <> show userId
         reqBody = encode $ UT.ActiveStatus { UT.isActive = False }
         reqBody' = NS.setRequestBodyLBS reqBody method
-        request' = NS.setRequestHeaders [("Content-Type","application/json") , ("X-API-KEY", B.pack $ SK.neureloKey sk )] reqBody'
+        request' = NS.setRequestHeaders [("Content-Type","application/json") , ("X-API-KEY", B.pack $ U.neureloKey sk )] reqBody'
     resp <- NS.httpLBS request'
     case NS.getResponseStatusCode resp of
         200 ->  do
@@ -120,19 +120,19 @@ deactivateUser sk userId = do
                 _ -> pure (dConnStatus, dConnBody)        
         _ -> pure (NS.getResponseStatus resp, NS.getResponseBody resp)
 
-createConn :: SK.SysKeys -> UT.UsrConn -> IO (Status, BLC.ByteString)
+createConn :: U.SysKeys -> UT.UsrConn -> IO (Status, BLC.ByteString)
 createConn sk usrsConn = do
     let 
-        method = NS.parseRequest_ $ "POST " <> SK.neureloEndpoint sk <> "/rest/USER_REL/__one"
-        request' = NS.setRequestBodyJSON usrsConn $ NS.setRequestHeader "X-API-KEY" [B.pack $ SK.neureloKey sk] method
+        method = NS.parseRequest_ $ "POST " <> U.neureloEndpoint sk <> "/rest/USER_REL/__one"
+        request' = NS.setRequestBodyJSON usrsConn $ NS.setRequestHeader "X-API-KEY" [B.pack $ U.neureloKey sk] method
     resp <- NS.httpLBS request'
     pure (NS.getResponseStatus resp, NS.getResponseBody resp)
 
-getUserConnections :: SK.SysKeys -> Int -> IO (Maybe [Int])
+getUserConnections :: U.SysKeys -> Int -> IO (Maybe [Int])
 getUserConnections sk user1 = do
     let 
-        method = NS.parseRequest_ $ "GET " <> SK.neureloEndpoint sk  <> "/rest/USER_REL"
-        request = NS.setRequestHeader "X-API-KEY" [B.pack $ SK.neureloKey sk] method
+        method = NS.parseRequest_ $ "GET " <> U.neureloEndpoint sk  <> "/rest/USER_REL"
+        request = NS.setRequestHeader "X-API-KEY" [B.pack $ U.neureloKey sk] method
         qFilters = "{\"AND\":[{\"user1\":{\"equals\":" <> B.pack (show user1) <> "}},{\"is_active\":{\"equals\": true}}]}" :: B.ByteString
         queryParamArr = [("select", Just "{\"user2\":true}"), 
             ("filter", Just qFilters )]

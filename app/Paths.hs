@@ -11,7 +11,7 @@ import Post.Actions(createPost, getUsrPosts)
 import Post.Types(Post)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
-import Syskeys (SysKeys, getKeys)
+import Utils (SysKeys, getKeys)
 import System.IO.Unsafe (unsafePerformIO)
 import Data.IORef
 

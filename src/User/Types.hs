@@ -13,7 +13,7 @@ module User.Types (
   IpUsrCreds(..)
 ) where
 
-import qualified ConvertTypes as CT
+import qualified Utils as U
 import Data.Aeson
 import GHC.Generics
 import Data.Text (Text, strip)
@@ -32,7 +32,7 @@ instance FromJSON User where
         username_ <- strip <$> obj .: "username"
         user_email_ <- strip <$> obj .: "user_email"
         user_pw_ <- strip <$> obj .: "user_pw"
-        dob_ <- CT.convertDate . strip <$> obj .: "dob"
+        dob_ <- U.convertDate . strip <$> obj .: "dob"
         country_ <- strip <$> obj .: "country"
         return $ User username_ user_email_ user_pw_ dob_ country_
 
