@@ -10,7 +10,8 @@
       imports = [
         inputs.haskell-flake.flakeModule
       ];
-      perSystem = { self', system, lib, config, pkgs, ... }:{
+      perSystem = { self', system, lib, config, pkgs, ... }:
+      {
         haskellProjects.default = {
                     
           basePackages = pkgs.haskellPackages;
@@ -57,7 +58,6 @@
           tag = builtins.substring 0 9 (self'.rev or "dev");
           copyToRoot = pkgs.buildEnv {
             paths = with pkgs; [
-              # writeNeureloKey
               coreutils
               bash
             ];
@@ -67,6 +67,9 @@
           config = {
             Cmd = [ "${pkgs.lib.getExe self'.packages.default}" ];
           };
+          extraCommands = ''
+            
+          '';
         };
       
       packages.default = self'.packages.eatsy-hs;

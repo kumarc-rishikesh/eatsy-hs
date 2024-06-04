@@ -45,7 +45,7 @@ library
 executable eatsy-hs
     import:           warnings
     main-is:          Main.hs
-    -- other-modules:
+    other-modules:    Paths
     -- other-extensions:
     build-depends:    base
                     , eatsy-hs
