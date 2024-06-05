@@ -60,6 +60,7 @@ executable eatsy-hs
                     , lens ^>=5.2.3
                     , async ^>=2.2.5
                     , http-types ^>=0.12.4
+                    , dotenv
 
 
     hs-source-dirs:   app

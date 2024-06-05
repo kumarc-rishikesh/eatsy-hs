@@ -44,10 +44,11 @@
             jq
             azure-cli
           ];
-          shellHook = ''
-              export NEURELO_KEY=$(cat neurelo_key)
-              export NEURELO_ENDPOINT="https://us-east-2.aws.neurelo.com"
-          '';
+          shellHook = '' 
+              source ./Keys.env
+              export NEURELO_KEY=$NEURELO_KEY
+              export NEURELO_ENDPOINT=$NEURELO_ENDPOINT
+              '';
         };
 
 
@@ -62,15 +63,15 @@
               bash
             ];
             name = "eatsy-hs-root";
-            pathsToLink = [ "/bin" "/secrets"];
           };        
           config = {
             Cmd = [ "${pkgs.lib.getExe self'.packages.default}" ];
+            Env = [
+              ''NEURELO_KEY=${builtins.getEnv "NEURELO_KEY"}''
+              ''NEURELO_ENDPOINT=${builtins.getEnv "NEURELO_ENDPOINT"}''
+            ];
           };
-          extraCommands = ''
-            
-          '';
-        };
+      };
       
       packages.default = self'.packages.eatsy-hs;
       apps.default = self'.apps.eatsy-hs;

@@ -8,7 +8,7 @@ import qualified Data.Text as T
 
 
 data SysKeys = SysKeys
-    { neureloKey :: String,
+    { neureloKey ::  String,
       neureloEndpoint :: String
     } deriving (Show)
 
@@ -16,9 +16,8 @@ getKeys :: IO SysKeys
 getKeys = do 
     nKey <- getEnv "NEURELO_KEY"
     nApi <- getEnv "NEURELO_ENDPOINT"
-    let syskeys = SysKeys nKey nApi
-    pure syskeys 
-
+    pure $ SysKeys nKey nApi
+    
 convertDate :: Text -> Text
 convertDate inputDate = do
     let parsedDate =  parseTimeOrError True defaultTimeLocale "%Y-%m-%d" (T.unpack inputDate) :: UTCTime

@@ -20,7 +20,7 @@ keys :: IORef SysKeys
 keys = unsafePerformIO $ do
     k <- getKeys
     newIORef k
-
+    
 checkUnameR :: WS.ActionM ()
 checkUnameR = do
     syskeys <- liftIO $ readIORef keys
