@@ -113,4 +113,10 @@ instance FromJSON UsrCreds where
         userPwCred_ <- dataObj .: "user_pw"
         userNameCred_ <- dataObj .: "username"
         return $ UsrCreds userIdCred_ userEmailCred_ userPwCred_ userNameCred_
-instance ToJSON UsrCreds 
+instance ToJSON UsrCreds where 
+    toJSON (UsrCreds userIdCred_ userEmailCred_ _ userNameCred_ ) = 
+        object [
+            "email" .= userEmailCred_,
+            "userId".= userIdCred_,
+            "name" .= userNameCred_
+        ]

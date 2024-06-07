@@ -4,3 +4,4 @@ comments
 client-session_key.aes
 result
 *.env
+secrets/

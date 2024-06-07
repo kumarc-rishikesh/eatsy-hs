@@ -37,6 +37,9 @@ library
                     , lens ^>=5.2.3
                     , async ^>=2.2.5
                     , http-types ^>=0.12.4
+                    , jwt
+                    , containers
+                    , scientific
 
     hs-source-dirs:   src
                     , src/User

@@ -16,12 +16,10 @@ import qualified Data.ByteString.Char8 as B
 import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString.Lazy.Char8 as BLC
 import Control.Monad (when)
-import Data.Text (Text)
+import Data.Text (Text, pack, unpack)
 import Data.Aeson
 import Data.Aeson.Types(parseMaybe)
 import Control.Exception (throwIO)
-
-
 import qualified User.Types as UT
 import qualified Utils as U
 

@@ -6,7 +6,7 @@
   };
   outputs = inputs:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = ["x86_64-linux"];
+      systems = ["x86_64-linux" "aarch64-linux"];
       imports = [
         inputs.haskell-flake.flakeModule
       ];
@@ -17,7 +17,7 @@
           basePackages = pkgs.haskellPackages;
 
           packages = {
-            scotty.source = "0.22"; # Hackage version
+            scotty.source = "0.22";
           };
 
           devShell = {
@@ -45,10 +45,10 @@
             azure-cli
           ];
           shellHook = '' 
-              source ./Keys.env
+              source Keys.env
               export NEURELO_KEY=$NEURELO_KEY
-              export NEURELO_ENDPOINT=$NEURELO_ENDPOINT
-              '';
+              export NEURELO_ENPOINT=$NEURELO_ENDPOINT
+          '';
         };
 
 
