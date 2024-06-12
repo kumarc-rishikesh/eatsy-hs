@@ -41,15 +41,10 @@
             jq
             azure-cli
           ];
-          shellHook = '' 
-              source Keys.env
-              export NEURELO_KEY=$NEURELO_KEY
-              export NEURELO_ENPOINT=$NEURELO_ENDPOINT
-          '';
         };
 
 
-# WIP add envs
+        #todo : figure out how to get ENV impurely into docker container
         packages.dockerImage = pkgs.dockerTools.buildImage {
           name = "eatsy-hs";
           created = "now";
@@ -63,10 +58,6 @@
           };        
           config = {
             Cmd = [ "${pkgs.lib.getExe self'.packages.default}" ];
-            Env = [
-              ''NEURELO_KEY=${builtins.getEnv "NEURELO_KEY"}''
-              ''NEURELO_ENDPOINT=${builtins.getEnv "NEURELO_ENDPOINT"}''
-            ];
           };
       };
       
