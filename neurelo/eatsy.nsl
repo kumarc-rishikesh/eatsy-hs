@@ -8,12 +8,6 @@
             "$ref": "#/objects/POSTS"
           }
         },
-        "USER_REL": {
-          "type": "array",
-          "items": {
-            "$ref": "#/objects/USER_REL"
-          }
-        },
         "country": {
           "type": "string"
         },
@@ -45,6 +39,12 @@
         "username": {
           "type": "string",
           "unique": true
+        },
+        "USER_REL_ref": {
+          "type": "array",
+          "items": {
+            "$ref": "#/objects/USER_REL"
+          }
         }
       }
     },
@@ -116,14 +116,33 @@
     },
     "USER_REL": {
       "properties": {
+        "rel_ts": {
+          "type": "string",
+          "format": "date-time",
+          "default": {
+            "function": "now"
+          },
+          "description": "timestamp when the connection was made"
+        },
+        "conn_id": {
+          "type": "integer",
+          "default": {
+            "function": "autoincrement"
+          },
+          "unique": true,
+          "description": "unique identifier of the connection"
+        },
         "is_active": {
           "type": "boolean",
-          "description": "connections are deactivated if either user deactivates their acc",
           "default": {
             "value": true
-          }
+          },
+          "description": "connection is deactivated when either of the user deactivates"
         },
-        "APPUSER": {
+        "user1": {
+          "type": "integer"
+        },
+        "APPUSER_ref": {
           "$ref": "#/objects/APPUSER",
           "relation": {
             "attrKey": [
@@ -131,26 +150,8 @@
             ],
             "foreignAttrKey": [
               "user_id"
-            ],
-            "onUpdate": "NoAction",
-            "onDelete": "NoAction"
+            ]
           }
-        },
-        "conn_id": {
-          "type": "integer",
-          "default": {
-            "function": "autoincrement"
-          }
-        },
-        "rel_ts": {
-          "type": "string",
-          "format": "date-time",
-          "default": {
-            "function": "now"
-          }
-        },
-        "user1": {
-          "type": "integer"
         },
         "user2": {
           "type": "integer"
